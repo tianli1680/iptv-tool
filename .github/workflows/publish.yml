@@ -1,0 +1,41 @@
+name: Publish iptv-tool to ghcr.io
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'iptv-tool.tar'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load docker image from tar
+        run: docker load -i iptv-tool.tar
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Tag and push to ghcr.io
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}:latest
+          docker tag iptv-tool:latest "$IMAGE"
+          docker push "$IMAGE"
+
+      - name: Make package public
+        run: |
+          # package name is derived from the repo name (iptv-tool)
+          curl -sS -X PATCH \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/user/packages/container/iptv-tool/visibility \
+            -d '{"visibility":"public"}'
