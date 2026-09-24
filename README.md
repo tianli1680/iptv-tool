@@ -7,5 +7,5 @@ docker pull ghcr.io/tianli1680/iptv-tool:latest
 
 ## 运行方式
 ```bash
-docker run -d --name tv-tool -v /etc/epg:/htdocs/data -p 5678:80 --restart unless-stopped ghcr.io/tianli1680/iptv-tool:latest
+docker run -d --name iptv-tool -v /etc/epg:/htdocs/data -p 5678:80 --restart unless-stopped ghcr.io/tianli1680/iptv-tool:latest
 ```
